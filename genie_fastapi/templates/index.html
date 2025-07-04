@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Databricks Healthcare Analytics Platform</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right, #e0ecff, #f4f7fc);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .modal-header {
+            color: #1a73e8;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .modal-description {
+            color: #5f6368;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+
+        .modal-button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .modal-button:hover {
+            background: #125fc3;
+        }
+
+        .modal-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .modal-button.cancel {
+            background: #f1f3f4;
+            color: #5f6368;
+            margin-right: 10px;
+            width: calc(50% - 5px);
+        }
+
+        .modal-button.cancel:hover {
+            background: #e8eaed;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main content */
+        .main-content {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* This centers everything horizontally */
+            justify-content: center;
+            text-align: center; /* This centers the text inside h1 */
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            color: #1a73e8;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .genie-id-button {
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #5f6368;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .genie-id-button:hover {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+            color: #1a73e8;
+        }
+
+        .section-description {
+            color: #5f6368;
+            text-align: center;
+            margin-bottom: 20px;
+            max-width: 1000px;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 16px 24px;
+            margin: 0 12px;
+            width: 200px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a73e8;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #5f6368;
+            font-weight: 500;
+        }
+
+        .query-type-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .business-indicator {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .predictive-indicator {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 1200px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            height: 600px;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-message {
+            margin-bottom: 18px;
+            padding: 14px 18px;
+            border-radius: 16px;
+            max-width: 80%;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+            animation: messageAppear 0.3s ease-out;
+        }
+
+        .user-message {
+            background: #1a73e8;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+            margin-left: auto;
+        }
+
+        .bot-message {
+            background: #f1f3f4;
+            color: #202124;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #999;
+            align-self: flex-start;
+            margin-left: 10px;
+            animation: typing 1s infinite;
+        }
+
+        .message-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .chat-input {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            padding: 18px 20px;
+            background: #f9f9f9;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            transition: box-shadow 0.2s;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+
+        .chat-input button {
+            padding: 12px 20px;
+            margin-left: 12px;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .chat-input button:hover {
+            background: #125fc3;
+        }
+
+        .chat-input button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 14px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #e2e2e2;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        td.highlight {
+            color: red;
+            font-weight: bold;
+        }
+
+        .csv-button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #f1f8ff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .csv-button:hover {
+            background: #dcefff;
+        }
+
+        .suggested-tags {
+            padding: 18px 20px;
+            background: #f8fbff;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .suggested-tags-header {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tag-category {
+            margin-bottom: 12px;
+        }
+
+        .tag-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .suggested-tags button {
+            background: #e3eafc;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #1a73e8;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggested-tags button:hover {
+            background: #d1defb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes typing {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        /* Mobile tweaks */
+        @media (max-width: 600px) {
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .chat-container {
+                border-radius: 0;
+            }
+
+            .chat-box {
+                padding: 16px;
+                height: 400px;
+            }
+
+            .chat-input {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .chat-input button {
+                margin-left: 0;
+            }
+            
+            .suggested-tags {
+                padding: 12px;
+            }
+            
+            .tag-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .suggested-tags button {
+                width: 100%;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 20px;
+            }
+        }
+
+        .schema-container {
+            width: 100%;
+            max-width: 1200px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .schema-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #f1f3f4;
+            padding-bottom: 12px;
+        }
+
+        .schema-header h3 {
+            margin: 0;
+            color: #1a73e8;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .schema-status {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .schema-status.loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .schema-status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .schema-status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .schema-columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .schema-column {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #bbdefb;
+        }
+
+        .schema-column.required {
+            background: #e8f5e8;
+            color: #2e7d2e;
+            border: 1px solid #a5d6a7;
+            font-weight: 600;
+        }
+
+        .required-columns-info {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .required-columns-title {
+            font-weight: 600;
+            color: #28a745;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Genie ID Modal -->
+    <div id="genieModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Update Genie Configuration</div>
+            <div class="modal-description">
+                Enter your custom Databricks Genie Room ID to use for analytics queries.
+            </div>
+            <input type="text" id="genieIdInput" class="modal-input" placeholder="Enter Genie Room ID..." value="01f02abdf3911c5284fd5591bb28c629" autocomplete="off">
+            <div class="modal-buttons">
+                <button id="cancelGenieId" class="modal-button cancel">Cancel</button>
+                <button id="submitGenieId" class="modal-button">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content">
+        <div class="header-section">
+            <h1>Databricks Healthcare Analytics Platform</h1>
+            <button id="changeGenieIdButton" class="genie-id-button">Update Genie ID</button>
+        </div>
+        
+        <div class="section-description">
+            A unified analytics platform that automatically determines whether your query needs direct business analytics or AI-powered predictive insights.
+        </div>
+        
+        
+        <!-- Schema Information Section -->
+        <div id="schemaSection" class="schema-container" style="display: none;">
+            <div class="schema-header">
+                <h3>📊 Dataset Schema</h3>
+                <span id="schemaStatus" class="schema-status">Loading...</span>
+            </div>
+            <div id="schemaColumns" class="schema-columns">
+                <!-- Schema columns will be displayed here -->
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="suggested-tags" id="suggestedTags">
+                <div class="suggested-tags-header">
+                    <span>Suggested Questions</span>
+                </div>
+                <div class="tag-category">
+                    <div class="tag-buttons" id="suggestedQuestions">
+                        <span style="color: #666; font-style: italic;">Loading questions based on your data schema...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="Ask any healthcare analytics question..." autocomplete="off">
+                <button id="sendButton">Send</button>
+            </div>
+            <div class="chat-box" id="chatBox">
+                <!-- Messages will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const genieModal = document.getElementById('genieModal');
+            const mainContent = document.getElementById('mainContent');
+            const genieIdInput = document.getElementById('genieIdInput');
+            const submitGenieIdButton = document.getElementById('submitGenieId');
+            const cancelGenieIdButton = document.getElementById('cancelGenieId');
+            const changeGenieIdButton = document.getElementById('changeGenieIdButton');
+            
+            const chatBox = document.getElementById('chatBox');
+            const userInput = document.getElementById('userInput');
+            const sendButton = document.getElementById('sendButton');
+            const suggestedQuestionsContainer = document.getElementById('suggestedQuestions');
+            const patientCountElement = document.getElementById('patientCount');
+            const doctorCountElement = document.getElementById('doctorCount');
+            
+            let isWaitingForResponse = false;
+            let currentMessageGroup = null;
+            let genieRoomId = '01f02f3e242515679535b61b717a4d5e'; // Default Genie ID
+            let schemaColumns = [];
+            
+            // Schema-related elements
+            const schemaSection = document.getElementById('schemaSection');
+            const schemaStatus = document.getElementById('schemaStatus');
+            const schemaColumnsContainer = document.getElementById('schemaColumns');
+            
+            // Initialize app on page load with default Genie ID
+            initializeApp();
+            
+            // Handle "Put your own genie id" button click
+            changeGenieIdButton.addEventListener('click', () => {
+                genieModal.style.display = 'flex';
+                genieIdInput.focus();
+            });
+            
+            // Handle modal cancel
+            cancelGenieIdButton.addEventListener('click', () => {
+                genieModal.style.display = 'none';
+            });
+            
+            // Handle Genie ID submission
+            function submitGenieId() {
+                const inputValue = genieIdInput.value.trim();
+                if (!inputValue) {
+                    alert('Please enter a valid Genie Room ID');
+                    return;
+                }
+                
+                submitGenieIdButton.disabled = true;
+                submitGenieIdButton.textContent = 'Updating...';
+                
+                // Send Genie ID to backend
+                fetch('/set-genie-id', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ genie_room_id: inputValue }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        genieRoomId = inputValue;
+                        genieModal.style.display = 'none';
+                        
+                        // Clear chat and reinitialize
+                        chatBox.innerHTML = '';
+                        
+                        // Fetch schema information with new ID
+                        fetchSchema(inputValue);
+                        
+                        // Show success message
+                        const successMessage = document.createElement('div');
+                        successMessage.className = 'chat-message bot-message';
+                        successMessage.textContent = 'Genie ID updated successfully! You can now ask your questions.';
+                        chatBox.appendChild(successMessage);
+                        
+                    } else {
+                        alert('Failed to update Genie ID: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error setting Genie ID:', error);
+                    alert(`Error updating Genie ID: ${error.message}. Please make sure the server is running and try again.`);
+                })
+                .finally(() => {
+                    submitGenieIdButton.disabled = false;
+                    submitGenieIdButton.textContent = 'Update';
+                });
+            }
+            
+            // Event listeners for Genie ID modal
+            submitGenieIdButton.addEventListener('click', submitGenieId);
+            
+            genieIdInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    submitGenieId();
+                }
+            });
+            
+            // Close modal when clicking outside
+            genieModal.addEventListener('click', (event) => {
+                if (event.target === genieModal) {
+                    genieModal.style.display = 'none';
+                }
+            });
+            
+            // Fetch schema information function
+            function fetchSchema(genieRoomId) {
+                schemaSection.style.display = 'block';
+                schemaStatus.textContent = 'Loading schema...';
+                schemaStatus.className = 'schema-status loading';
+                
+                fetch('/fetch-schema', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ genie_room_id: genieRoomId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        schemaColumns = data.columns || [];
+                        displaySchemaColumns(schemaColumns);
+                        schemaStatus.textContent = `${schemaColumns.length} columns detected`;
+                        schemaStatus.className = 'schema-status success';
+                        
+                        // Load sample questions after schema is successfully fetched
+                        loadSampleQuestions();
+                    } else {
+                        schemaStatus.textContent = 'Failed to load schema';
+                        schemaStatus.className = 'schema-status error';
+                        console.error('Error fetching schema:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching schema:', error);
+                    schemaStatus.textContent = 'Error loading schema';
+                    schemaStatus.className = 'schema-status error';
+                });
+            }
+            
+            // Display schema columns
+            function displaySchemaColumns(columns, requiredColumns = []) {
+                schemaColumnsContainer.innerHTML = '';
+                
+                columns.forEach(column => {
+                    const columnDiv = document.createElement('div');
+                    columnDiv.className = 'schema-column';
+                    columnDiv.textContent = column;
+                    
+                    // Highlight required columns
+                    if (requiredColumns.includes(column)) {
+                        columnDiv.classList.add('required');
+                    }
+                    
+                    schemaColumnsContainer.appendChild(columnDiv);
+                });
+                
+                // Show required columns info if any
+                if (requiredColumns.length > 0) {
+                    const existingInfo = schemaSection.querySelector('.required-columns-info');
+                    if (existingInfo) {
+                        existingInfo.remove();
+                    }
+                    
+                    const requiredInfo = document.createElement('div');
+                    requiredInfo.className = 'required-columns-info';
+                    requiredInfo.innerHTML = `
+                        <div class="required-columns-title">Required columns for current query:</div>
+                        <div>${requiredColumns.join(', ')}</div>
+                    `;
+                    schemaSection.appendChild(requiredInfo);
+                } else {
+                    // Remove required columns info if no required columns
+                    const existingInfo = schemaSection.querySelector('.required-columns-info');
+                    if (existingInfo) {
+                        existingInfo.remove();
+                    }
+                }
+            }
+            
+            // Initialize app function
+            function initializeApp() {
+                // Set default Genie ID in backend
+                fetch('/set-genie-id', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ genie_room_id: genieRoomId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Fetch schema information
+                        fetchSchema(genieRoomId);
+                    } else {
+                        console.error('Error setting default Genie ID:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error setting default Genie ID:', error);
+                });
+                
+                // Fetch statistics
+                fetchStatistics();
+                
+                // Refresh statistics every 5 minutes
+                setInterval(fetchStatistics, 300000);
+                
+                // Focus input field
+                userInput.focus();
+            }
+            
+            // Fetch statistics
+            function fetchStatistics() {
+                fetch('/stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (patientCountElement) patientCountElement.textContent = data.patient_count.toLocaleString();
+                        if (doctorCountElement) doctorCountElement.textContent = data.doctor_count.toLocaleString();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching statistics:', error);
+                        if (patientCountElement) patientCountElement.textContent = 'N/A';
+                        if (doctorCountElement) doctorCountElement.textContent = 'N/A';
+                    });
+            }
+            
+            
+            // Load sample questions
+            function loadSampleQuestions() {
+                // Clear existing content (including loading message)
+                suggestedQuestionsContainer.innerHTML = '';
+                
+                fetch('/sample-questions?section=all')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Load suggested questions
+                        if (data.questions && Array.isArray(data.questions)) {
+                            data.questions.forEach(question => {
+                                const button = document.createElement('button');
+                                button.textContent = question;
+                                button.addEventListener('click', () => {
+                                    userInput.value = question;
+                                    sendMessage();
+                                });
+                                suggestedQuestionsContainer.appendChild(button);
+                            });
+                        } else {
+                            console.error('Unexpected data format:', data);
+                            // Show error message if questions format is unexpected
+                            const errorMsg = document.createElement('span');
+                            errorMsg.style.color = '#666';
+                            errorMsg.style.fontStyle = 'italic';
+                            errorMsg.textContent = 'Unable to load dynamic questions. Please try asking your own questions.';
+                            suggestedQuestionsContainer.appendChild(errorMsg);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading sample questions:', error);
+                        // Show error message if fetch fails
+                        const errorMsg = document.createElement('span');
+                        errorMsg.style.color = '#666';
+                        errorMsg.style.fontStyle = 'italic';
+                        errorMsg.textContent = 'Unable to load questions. Please try asking your own questions.';
+                        suggestedQuestionsContainer.appendChild(errorMsg);
+                    });
+            }
+            
+            // Send message function
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message || isWaitingForResponse) return;
+                
+                // Create a new message group for this conversation pair
+                currentMessageGroup = document.createElement('div');
+                currentMessageGroup.className = 'message-group';
+                chatBox.prepend(currentMessageGroup);
+                
+                // Add user message to the current group
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'chat-message user-message';
+                userMessageDiv.textContent = message;
+                currentMessageGroup.appendChild(userMessageDiv);
+                
+                // Clear input
+                userInput.value = '';
+                
+                // Disable input while waiting
+                isWaitingForResponse = true;
+                sendButton.disabled = true;
+                sendButton.textContent = 'Waiting...';
+                
+                // Show typing indicator in the current group
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'chat-message typing';
+                typingIndicator.id = 'typingIndicator';
+                typingIndicator.textContent = 'Thinking...';
+                currentMessageGroup.appendChild(typingIndicator);
+                
+                // Prepare request data
+                const requestData = { 
+                    query: message 
+                };
+                
+                // Send request to server
+                fetch('/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove typing indicator
+                    const indicator = document.getElementById('typingIndicator');
+                    if (indicator) indicator.remove();
+                    
+                    if (data.error) {
+                        addBotMessage(`Error: ${data.error}`);
+                    } else if (data.response_type === 'table') {
+                        addTableResponse(data);
+                    } else {
+                        addBotMessage(data.message, data.query_type);
+                    }
+                    
+                    // Update schema display with required columns if available
+                    if (data.required_columns && Array.isArray(data.required_columns)) {
+                        displaySchemaColumns(schemaColumns, data.required_columns);
+                    }
+                    
+                    // Refresh statistics after each query response
+                    fetchStatistics();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Remove typing indicator
+                    const indicator = document.getElementById('typingIndicator');
+                    if (indicator) indicator.remove();
+                    
+                    addBotMessage('Sorry, there was an error processing your request. Please try again.');
+                })
+                .finally(() => {
+                    // Re-enable input
+                    isWaitingForResponse = false;
+                    sendButton.disabled = false;
+                    sendButton.textContent = 'Send';
+                });
+            }
+            
+            // Add bot text message to current group
+            function addBotMessage(text, queryType = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message bot-message';
+                
+                // Add query type indicator for bot messages
+                if (queryType) {
+                    const indicatorSpan = document.createElement('span');
+                    indicatorSpan.className = `query-type-indicator ${queryType}-indicator`;
+                    indicatorSpan.textContent = queryType === 'business' ? 'Business Analytics' : 'Predictive Analytics';
+                    messageDiv.appendChild(indicatorSpan);
+                    
+                    const messageText = document.createElement('div');
+                    messageText.textContent = text;
+                    messageDiv.appendChild(messageText);
+                } else {
+                    messageDiv.textContent = text;
+                }
+                
+                // Add to current message group
+                if (currentMessageGroup) {
+                    currentMessageGroup.appendChild(messageDiv);
+                } else {
+                    // Fallback if no current group
+                    chatBox.prepend(messageDiv);
+                }
+            }
+            
+            // Add table response to chat
+            function addTableResponse(data) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message bot-message';
+                
+                // Add query type indicator
+                if (data.query_type) {
+                    const indicatorSpan = document.createElement('span');
+                    indicatorSpan.className = `query-type-indicator ${data.query_type}-indicator`;
+                    indicatorSpan.textContent = data.query_type === 'business' ? 'Business Analytics' : 'Predictive Analytics';
+                    messageDiv.appendChild(indicatorSpan);
+                }
+                
+                const tableWrapper = document.createElement('div');
+                tableWrapper.innerHTML = '<p>Here are the results:</p>';
+                
+                const table = document.createElement('table');
+                
+                // Create table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                
+                data.columns.forEach(column => {
+                    const th = document.createElement('th');
+                    th.textContent = column;
+                    headerRow.appendChild(th);
+                });
+                
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Create table body
+                const tbody = document.createElement('tbody');
+                
+                data.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    
+                    data.columns.forEach(column => {
+                        const td = document.createElement('td');
+                        td.textContent = row[column] !== null ? row[column] : '';
+                        tr.appendChild(td);
+                    });
+                    
+                    tbody.appendChild(tr);
+                });
+                
+                table.appendChild(tbody);
+                tableWrapper.appendChild(table);
+                
+                // Add download button for table data
+                const downloadButton = document.createElement('button');
+                downloadButton.className = 'csv-button';
+                downloadButton.textContent = 'Download as CSV';
+                downloadButton.addEventListener('click', () => {
+                    downloadCSV(data.data, data.columns);
+                });
+                
+                tableWrapper.appendChild(downloadButton);
+                messageDiv.appendChild(tableWrapper);
+                
+                // Add to current message group
+                if (currentMessageGroup) {
+                    currentMessageGroup.appendChild(messageDiv);
+                } else {
+                    // Fallback if no current group
+                    chatBox.prepend(messageDiv);
+                }
+            }
+            
+            // Download table data as CSV
+            function downloadCSV(data, columns) {
+                let csvContent = columns.join(',') + '\r\n';
+                
+                data.forEach(row => {
+                    const values = columns.map(column => {
+                        const value = row[column] !== null ? row[column] : '';
+                        // Escape commas and quotes
+                        return `"${String(value).replace(/"/g, '""')}"`;
+                    });
+                    csvContent += values.join(',') + '\r\n';
+                });
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'healthcare_analytics_data.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            
+            userInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

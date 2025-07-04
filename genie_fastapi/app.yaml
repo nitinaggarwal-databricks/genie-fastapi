@@ -1,0 +1,9 @@
+work_dir: /Workspace/Users/nitin.aggarwal@databricks.com/fastapi_adt_genie_app
+command: [
+  "uvicorn",
+  "app:app",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "8000"
+]
