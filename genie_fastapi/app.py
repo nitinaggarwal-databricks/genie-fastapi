@@ -130,7 +130,7 @@ When you receive a query, analyze it against the provided schema and return only
         "content": query
       }
       ],
-      model="my-gpt-endpoint",
+      model="Claude Sonnet 4",
       max_tokens=2048
     )
     
@@ -202,7 +202,7 @@ Give me the list of the questions in the list format only. Dont give any other p
                 "content": "Generate 5 simple questions based on the provided schema information."
             }
         ],
-        model="my-gpt-endpoint",
+        model="Claude Sonnet 4",
         max_tokens=2048,
         temperature = 0,
     )
